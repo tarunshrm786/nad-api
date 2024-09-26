@@ -43,6 +43,7 @@ connectDB();
 const allowedOrigins = [
   'http://localhost:3000',
   'https://nad-api-tarunshrm768gmailcoms-projects.vercel.app',
+  'https://react-college-website-design-by-tarun-sharma.vercel.app'
 ];
 
 // Middleware to parse JSON
