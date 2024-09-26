@@ -1,8 +1,10 @@
-// routes/authRoutes.js
+// routes/studentRoutes.js
 const express = require('express');
-const { signup } = require('../controllers/authController');
+const { signup } = require('../controllers/studentController');
+
 const router = express.Router();
 
+// Admin route to add a new student
 router.post('/signup', signup);
 
 module.exports = router;

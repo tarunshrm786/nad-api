@@ -16,11 +16,11 @@ connectDB();
 app.use(express.json());
 
 // Import routes
-const authRoutes = require('./routes/authRoutes');
-const healthRoutes = require('./routes/healthRoutes'); // Add this line
+const authRoutes = require('./routes/studentRoutes');
+const healthRoutes = require('./routes/healthRoutes'); 
 
 // Use routes
-app.use('/api/auth', authRoutes);
-app.use('/', healthRoutes); // Add this line to serve the health check route
+app.use('/api/auth', authRoutes); // Student routes (signup, etc.)
+app.use('/api/health', healthRoutes); // Health check route
 
 module.exports = app;
