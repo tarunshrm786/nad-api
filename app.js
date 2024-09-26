@@ -41,8 +41,8 @@ connectDB();
 
 // Define allowed origins
 const allowedOrigins = [
-  'http://localhost:3000/',
-  'https://nad-api-tarunshrm768gmailcoms-projects.vercel.app/',
+  'http://localhost:3000',
+  'https://nad-api-tarunshrm768gmailcoms-projects.vercel.app',
 ];
 
 // Middleware to parse JSON
