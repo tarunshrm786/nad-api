@@ -165,17 +165,21 @@ const getMentors = async (req, res) => {
     try {
         // Fetch mentors while excluding the image data
         const mentors = await Mentor.find().select('-image.data');
-        
+
         // Map through the mentors to include image URLs
-        const mentorsWithImageUrls = await Promise.all(mentors.map(async (mentor) => {
-            const imageUrl = mentor.image.data
-                ? `data:${mentor.image.contentType};base64,${mentor.image.data.toString('base64')}`
-                : null; // Handle case where there is no image
+        const mentorsWithImageUrls = mentors.map(mentor => {
+            let imageUrl = null;
+
+            // Check if image data exists
+            if (mentor.image.data) {
+                imageUrl = `data:${mentor.image.contentType};base64,${mentor.image.data.toString('base64')}`;
+            }
+
             return {
                 ...mentor._doc, // Spread the existing mentor data
                 imageUrl, // Add image URL to the response
             };
-        }));
+        });
 
         res.json(mentorsWithImageUrls);
     } catch (err) {
