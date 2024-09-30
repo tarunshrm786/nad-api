@@ -62,32 +62,34 @@ const createMentor = async (req, res) => {
 //         res.status(400).json({ error: err.message });
 //     }
 // };
+
 const getMentors = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; // Get page number from query
-        const limit = parseInt(req.query.limit) || 10; // Get limit from query (default to 10)
-        const skip = (page - 1) * limit; // Calculate how many records to skip
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
-        // Ensure pagination does not go below zero
         if (page < 1 || limit < 1) {
             return res.status(400).json({ error: 'Page and limit must be greater than zero.' });
         }
 
-        // Fetch mentors with pagination
-        const mentors = await Mentor.find().skip(skip).limit(limit); 
-        const total = await Mentor.countDocuments(); // Get total number of mentors
+        const mentors = await Mentor.find({}, { image: 0 }) // Exclude image field
+            .skip(skip)
+            .limit(limit);
+        const total = await Mentor.countDocuments();
 
         res.json({
-            total, // Total number of mentors
-            page, // Current page
-            limit, // Limit per page
-            mentors, // List of mentors for current page
+            total,
+            page,
+            limit,
+            mentors,
         });
     } catch (err) {
-        console.error('Error fetching mentors:', err.message); // Log the error message
-        res.status(500).json({ error: 'Internal Server Error. Please try again.' }); // Return a more generic error
+        console.error('Error fetching mentors:', err.message);
+        res.status(500).json({ error: 'Internal Server Error. Please try again.' });
     }
 };
+
 
 
 // New deleteMentor function

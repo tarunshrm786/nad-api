@@ -206,8 +206,12 @@ const allowedOrigins = [
 ];
 
 // Middleware to parse JSON
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// Middleware to parse JSON with increased limit for larger payloads
+app.use(express.json({ limit: '50mb' })); // Updated: Set JSON payload limit to 50 MB
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Updated: Set URL-encoded payload limit to 50 MB
+
 
 // CORS middleware configuration
 app.use(cors({
