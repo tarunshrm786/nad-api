@@ -68,7 +68,13 @@ const getMentors = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10; // Get limit from query (default to 10)
         const skip = (page - 1) * limit; // Calculate how many records to skip
 
-        const mentors = await Mentor.find().skip(skip).limit(limit); // Fetch mentors with pagination
+        // Ensure pagination does not go below zero
+        if (page < 1 || limit < 1) {
+            return res.status(400).json({ error: 'Page and limit must be greater than zero.' });
+        }
+
+        // Fetch mentors with pagination
+        const mentors = await Mentor.find().skip(skip).limit(limit); 
         const total = await Mentor.countDocuments(); // Get total number of mentors
 
         res.json({
@@ -78,8 +84,8 @@ const getMentors = async (req, res) => {
             mentors, // List of mentors for current page
         });
     } catch (err) {
-        console.error('Error fetching mentors:', err.message);
-        res.status(400).json({ error: err.message });
+        console.error('Error fetching mentors:', err.message); // Log the error message
+        res.status(500).json({ error: 'Internal Server Error. Please try again.' }); // Return a more generic error
     }
 };
 
