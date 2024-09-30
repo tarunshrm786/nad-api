@@ -45,8 +45,11 @@ const createMentor = async (req, res) => {
         await newMentor.save();
         res.status(201).json({ message: 'Mentor created successfully!' });
     } catch (err) {
-        console.error('Error creating mentor:', err.message);
-        res.status(400).json({ error: err.message });
+        // console.error('Error creating mentor:', err.message);
+        // res.status(400).json({ error: err.message });
+        console.error('Error creating mentor:', err.message); // Log only the error message
+        console.error('Error stack:', err.stack); // Log the error stack for debugging
+        res.status(500).json({ error: 'Internal Server Error. Please try again.' });
     }
 };
 
