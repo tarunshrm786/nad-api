@@ -216,6 +216,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Updated: Set 
 // CORS middleware configuration
 app.use(cors({
   // origin: allowedOrigins,
+  origin: '*', // Allow all origins
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
