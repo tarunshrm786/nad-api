@@ -53,15 +53,36 @@ const createMentor = async (req, res) => {
     }
 };
 
+// const getMentors = async (req, res) => {
+//     try {
+//         const mentors = await Mentor.find();
+//         res.json(mentors);
+//     } catch (err) {
+//         console.error('Error fetching mentors:', err.message);
+//         res.status(400).json({ error: err.message });
+//     }
+// };
 const getMentors = async (req, res) => {
     try {
-        const mentors = await Mentor.find();
-        res.json(mentors);
+        const page = parseInt(req.query.page) || 1; // Get page number from query
+        const limit = parseInt(req.query.limit) || 10; // Get limit from query (default to 10)
+        const skip = (page - 1) * limit; // Calculate how many records to skip
+
+        const mentors = await Mentor.find().skip(skip).limit(limit); // Fetch mentors with pagination
+        const total = await Mentor.countDocuments(); // Get total number of mentors
+
+        res.json({
+            total, // Total number of mentors
+            page, // Current page
+            limit, // Limit per page
+            mentors, // List of mentors for current page
+        });
     } catch (err) {
         console.error('Error fetching mentors:', err.message);
         res.status(400).json({ error: err.message });
     }
 };
+
 
 // New deleteMentor function
 const deleteMentor = async (req, res) => {
