@@ -53,42 +53,16 @@ const createMentor = async (req, res) => {
     }
 };
 
-// const getMentors = async (req, res) => {
-//     try {
-//         const mentors = await Mentor.find();
-//         res.json(mentors);
-//     } catch (err) {
-//         console.error('Error fetching mentors:', err.message);
-//         res.status(400).json({ error: err.message });
-//     }
-// };
-
 const getMentors = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-
-        if (page < 1 || limit < 1) {
-            return res.status(400).json({ error: 'Page and limit must be greater than zero.' });
-        }
-
-        const mentors = await Mentor.find({}, { image: 0 }) // Exclude image field
-            .skip(skip)
-            .limit(limit);
-        const total = await Mentor.countDocuments();
-
-        res.json({
-            total,
-            page,
-            limit,
-            mentors,
-        });
+        const mentors = await Mentor.find();
+        res.json(mentors);
     } catch (err) {
         console.error('Error fetching mentors:', err.message);
-        res.status(500).json({ error: 'Internal Server Error. Please try again.' });
+        res.status(400).json({ error: err.message });
     }
 };
+
 
 
 
