@@ -1,5 +1,5 @@
-// controllers/mentorController.js
-const Mentor = require('../models/mentorModel');
+// controllers/teamsController.js
+const Team = require('../models/TeamModel'); // Assuming you have a teamModel.js
 const mongoose = require('mongoose');
 const Grid = require('gridfs-stream'); // If you're using GridFS, ensure it's set up correctly
 const { storage } = require('../config/db'); // Make sure your storage config is properly set
@@ -19,12 +19,12 @@ const upload = multer({
     }
 }).single('image');
 
-const createMentor = async (req, res) => {
+const createTeam = async (req, res) => {
     try {
         console.log('Request Body:', req.body);
         console.log('Uploaded File:', req.file);
 
-        const { name, city, post } = req.body;
+        const { name, city, post } = req.body; // Assuming the team member has name, city, and role
 
         // Check if image is provided
         if (!req.file) {
@@ -32,58 +32,57 @@ const createMentor = async (req, res) => {
             return res.status(400).json({ error: 'No file uploaded. Please upload an image.' });
         }
 
-        const newMentor = new Mentor({
+        const newTeamMember = new Team({
             name,
             city,
-            post,
+            post, // Using 'role' instead of 'post' for team members
             image: {
                 data: req.file.buffer,
                 contentType: req.file.mimetype,
             }
         });
 
-        await newMentor.save();
-        res.status(201).json({ message: 'Mentor created successfully!' });
+        await newTeamMember.save();
+        res.status(201).json({ message: 'Team member created successfully!' });
     } catch (err) {
-        console.error('Error creating mentor:', err.message);
+        console.error('Error creating team member:', err.message);
         res.status(400).json({ error: err.message });
     }
 };
 
-const getMentors = async (req, res) => {
+const getTeams = async (req, res) => {
     try {
-        const mentors = await Mentor.find();
-        res.json(mentors);
+        const teams = await Team.find();
+        res.json(teams);
     } catch (err) {
-        console.error('Error fetching mentors:', err.message);
+        console.error('Error fetching team members:', err.message);
         res.status(400).json({ error: err.message });
     }
 };
 
-// New deleteMentor function
-const deleteMentor = async (req, res) => {
+// New deleteTeam function
+const deleteTeam = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Check if the mentor exists
-        const mentor = await Mentor.findById(id);
-        if (!mentor) {
-            return res.status(404).json({ error: 'Mentor not found.' });
+        // Check if the team member exists
+        const teamMember = await Team.findById(id);
+        if (!teamMember) {
+            return res.status(404).json({ error: 'Team member not found.' });
         }
 
-        // Delete the mentor
-        await Mentor.findByIdAndDelete(id);
-        res.status(200).json({ message: 'Mentor deleted successfully!' });
+        // Delete the team member
+        await Team.findByIdAndDelete(id);
+        res.status(200).json({ message: 'Team member deleted successfully!' });
     } catch (err) {
-        console.error('Error deleting mentor:', err.message);
+        console.error('Error deleting team member:', err.message);
         res.status(400).json({ error: err.message });
     }
 };
 
-
 module.exports = {
     upload,
-    createMentor,
-    getMentors,
-    deleteMentor,
+    createTeam,
+    getTeams,
+    deleteTeam,
 };

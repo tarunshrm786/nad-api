@@ -220,11 +220,13 @@ app.use(cors({
 const studentRoutes = require('./routes/studentRoutes'); // Include student routes for authentication
 const healthRoutes = require('./routes/healthRoutes'); // Health check route
 const mentorRoutes = require('./routes/mentorRoutes'); // Mentor routes
+const teamRoutes = require('./routes/teamRoutes'); // team routes
 
 // Use routes
 app.use('/api/auth', studentRoutes); // Student routes (signup, login, etc.)
 app.use('/api/health', healthRoutes); // Health check route
 app.use('/api/mentors', mentorRoutes); // Mentor CRUD routes
+app.use('/api/teams', teamRoutes); // team CRUD routes
 
 // Basic health check route (you might not need this if healthRoutes is defined elsewhere)
 app.get('/api/health', (req, res) => {
