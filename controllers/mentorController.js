@@ -842,38 +842,15 @@ const createMentor = async (req, res) => {
     }
 };
 
-// // Get mentors without image data (for listing)
-// const getMentors = async (req, res) => {
-//     try {
-//         const { page = 1, limit = 10 } = req.query;
-//         const mentors = await Mentor.find()
-//             .skip((page - 1) * limit)
-//             .limit(parseInt(limit));
-
-//         // Transform the mentors to include the Base64 image string
-//         const mentorsWithImages = mentors.map(mentor => ({
-//             _id: mentor._id,
-//             name: mentor.name,
-//             city: mentor.city,
-//             post: mentor.post,
-//             imageUrl: `data:${mentor.image.contentType};base64,${mentor.image.data}`,
-//         }));
-
-//         res.json(mentorsWithImages);
-//     } catch (err) {
-//         console.error('Error fetching mentors:', err.message);
-//         res.status(400).json({ error: err.message });
-//     }
-// };
-
+// Get mentors without image data (for listing)
 const getMentors = async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
-        const parsedLimit = Math.min(parseInt(limit), 100); // Set a maximum limit of 100
+        const { page = 1, limit = 20 } = req.query;
         const mentors = await Mentor.find()
-            .skip((page - 1) * parsedLimit)
-            .limit(parsedLimit);
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
 
+        // Transform the mentors to include the Base64 image string
         const mentorsWithImages = mentors.map(mentor => ({
             _id: mentor._id,
             name: mentor.name,
@@ -888,6 +865,7 @@ const getMentors = async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 };
+
 
 
 // Get mentor by ID with all fields, including image
