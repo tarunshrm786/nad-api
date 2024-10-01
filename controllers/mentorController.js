@@ -188,7 +188,6 @@
 //     deleteMentor,
 // };
 
-
 const Mentor = require('../models/mentorModel');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -196,36 +195,30 @@ const sharp = require('sharp');
 
 // Configure multer for file uploads
 const upload = multer({
-    storage: multer.memoryStorage(), // Store in memory to process with sharp
-    limits: { fileSize: 1024 * 1024 * 10 }, // Allow up to 10 MB for high-res images before compression
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 1024 * 1024 * 10 },
     fileFilter: (req, file, cb) => {
         const filetypes = /jpg|jpeg|png/;
         const mimetype = filetypes.test(file.mimetype);
         if (mimetype) {
             return cb(null, true);
         }
-        cb('Error: File type not supported!');
+        cb(new Error('Error: File type not supported!'));
     }
 }).single('image');
 
 // Create mentor with compressed image
 const createMentor = async (req, res) => {
     try {
-        console.log('Request Body:', req.body);
-        console.log('Uploaded File:', req.file);
-
         const { name, city, post } = req.body;
 
-        // Check if image is provided
         if (!req.file) {
-            console.error('No file uploaded.');
             return res.status(400).json({ error: 'No file uploaded. Please upload an image.' });
         }
 
-        // Compress the image using sharp
         const compressedImageBuffer = await sharp(req.file.buffer)
-            .resize(300) // Resize to a width of 300px (maintain aspect ratio)
-            .jpeg({ quality: 80 }) // Compress to JPEG with 80% quality
+            .resize(300)
+            .jpeg({ quality: 80 })
             .toBuffer();
 
         const newMentor = new Mentor({
@@ -234,15 +227,14 @@ const createMentor = async (req, res) => {
             post,
             image: {
                 data: compressedImageBuffer,
-                contentType: 'image/jpeg', // Store as JPEG format
+                contentType: 'image/jpeg',
             }
         });
 
         await newMentor.save();
         res.status(201).json({ message: 'Mentor created successfully!' });
     } catch (err) {
-        console.error('Error creating mentor:', err.message); // Log the error message
-        console.error('Error stack:', err.stack); // Log the error stack for debugging
+        console.error('Error creating mentor:', err.message);
         res.status(500).json({ error: 'Internal Server Error. Please try again.' });
     }
 };
@@ -250,9 +242,9 @@ const createMentor = async (req, res) => {
 // Get mentors without image data (for listing)
 const getMentors = async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.query; // Pagination support
+        const { page = 1, limit = 10 } = req.query;
         const mentors = await Mentor.find()
-            .select('name city post') // Exclude image data
+            .select('name city post')
             .skip((page - 1) * limit)
             .limit(parseInt(limit));
 
@@ -263,22 +255,20 @@ const getMentors = async (req, res) => {
     }
 };
 
-// Get mentor image by ID (serve image separately)
-const getMentorImage = async (req, res) => {
+// Get mentor by ID with all fields, including image
+const getMentorById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const mentor = await Mentor.findById(id).select('image');
+        const mentor = await Mentor.findById(id);
 
-        if (!mentor || !mentor.image) {
-            return res.status(404).json({ error: 'Image not found.' });
+        if (!mentor) {
+            return res.status(404).json({ error: 'Mentor not found.' });
         }
 
-        // Set the correct content type for the image
-        res.set('Content-Type', mentor.image.contentType);
-        res.send(mentor.image.data); // Send the binary image data
+        res.json(mentor);
     } catch (err) {
-        console.error('Error fetching image:', err.message);
+        console.error('Error fetching mentor:', err.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
@@ -288,13 +278,11 @@ const deleteMentor = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Check if the mentor exists
         const mentor = await Mentor.findById(id);
         if (!mentor) {
             return res.status(404).json({ error: 'Mentor not found.' });
         }
 
-        // Delete the mentor
         await Mentor.findByIdAndDelete(id);
         res.status(200).json({ message: 'Mentor deleted successfully!' });
     } catch (err) {
@@ -307,6 +295,6 @@ module.exports = {
     upload,
     createMentor,
     getMentors,
-    getMentorImage,
+    getMentorById,
     deleteMentor,
 };
