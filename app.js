@@ -330,7 +330,8 @@ connectDB();
 const allowedOrigins = [
   'http://localhost:3000',
   'https://nad-api-tarunshrm768gmailcoms-projects.vercel.app',
-  'https://react-college-website-design-by-tarun-sharma.vercel.app'
+  'https://react-college-website-design-by-tarun-sharma.vercel.app',
+  'https://nad-api-tarunshrm768gmailcoms-projects.vercel.app/api'
 ];
 
 // Middleware to parse JSON with increased limit for larger payloads
