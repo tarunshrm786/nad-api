@@ -44,10 +44,11 @@ const mentorSchema = new mongoose.Schema({
     name: { type: String, required: true },
     city: { type: String, required: true },
     post: { type: String, required: true },
-    image: {
-        url: { type: String, required: true }, // Store the image URL
-        contentType: { type: String }, // Optional: store content type if needed
+    image: { 
+        data: { type: String, required: true }, // Store Base64 image string
+        contentType: { type: String, required: true } // Store image MIME type
     }
 });
 
-module.exports = mongoose.model('Mentor', mentorSchema);
+const Mentor = mongoose.model('Mentor', mentorSchema);
+module.exports = Mentor;

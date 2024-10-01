@@ -39,17 +39,17 @@
 
 const express = require('express');
 const {
-    upload,
     createMentor,
     getMentors,
     getMentorById,
-    deleteMentor
+    deleteMentor,
+    upload // Import the upload middleware
 } = require('../controllers/mentorController');
 
 const router = express.Router();
 
 // POST route to create a new mentor
-router.post('/', upload, createMentor); // Use the upload middleware here
+router.post('/', upload.single('image'), createMentor); // Use the upload middleware to handle file uploads
 
 // GET route to retrieve all mentors
 router.get('/', getMentors);
