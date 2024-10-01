@@ -316,6 +316,172 @@
 //     deleteMentor,
 // };
 
+// const Mentor = require('../models/mentorModel');
+// const mongoose = require('mongoose');
+// const multer = require('multer');
+// const path = require('path');
+// const fs = require('fs');
+// const sharp = require('sharp');
+
+// // Ensure the uploads directory exists
+// const uploadsDir = path.join(__dirname, '../uploads');
+// if (!fs.existsSync(uploadsDir)) {
+//     fs.mkdirSync(uploadsDir);
+// }
+
+// // Configure multer for file uploads
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, uploadsDir); // Save to the uploads directory
+//     },
+//     filename: (req, file, cb) => {
+//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9); // Unique identifier
+//         const ext = path.extname(file.originalname); // Get file extension
+//         cb(null, file.fieldname + '-' + uniqueSuffix + ext); // Create a unique filename
+//     }
+// });
+
+// const upload = multer({
+//     storage,
+//     limits: { fileSize: 1024 * 1024 * 10 },
+//     fileFilter: (req, file, cb) => {
+//         const filetypes = /jpg|jpeg|png/;
+//         const mimetype = filetypes.test(file.mimetype);
+//         if (mimetype) {
+//             return cb(null, true);
+//         }
+//         cb(new Error('Error: File type not supported!'));
+//     }
+// }).single('image');
+
+// // Create mentor with compressed image
+// const createMentor = async (req, res) => {
+//     try {
+//         console.log('Received request body:', req.body);
+//         console.log('Uploaded file:', req.file);
+        
+//         const { name, city, post } = req.body;
+
+//         if (!name || !city || !post) {
+//             return res.status(400).json({ error: 'All fields are required.' });
+//         }
+
+//         if (!req.file) {
+//             return res.status(400).json({ error: 'No file uploaded. Please upload an image.' });
+//         }
+
+//         // Compress the image using sharp
+//         const compressedImageBuffer = await sharp(req.file.path)
+//             .resize(300)
+//             .jpeg({ quality: 80 })
+//             .toBuffer();
+
+//         // Save the compressed image back to the file system
+//         await fs.promises.writeFile(req.file.path, compressedImageBuffer);
+
+//         // Store the image URL (file path) in MongoDB
+//         const imageUrl = `/uploads/${req.file.filename}`;
+
+//         const newMentor = new Mentor({
+//             name,
+//             city,
+//             post,
+//             image: {
+//                 url: imageUrl,
+//                 contentType: req.file.mimetype,
+//             }
+//         });
+
+//         await newMentor.save();
+//         res.status(201).json({ message: 'Mentor created successfully!', mentor: newMentor });
+//     } catch (err) {
+//         console.error('Error creating mentor:', err.message);
+//         res.status(500).json({ error: 'Internal Server Error. Please try again.' });
+//     }
+// };
+
+
+// // Get mentors without image data (for listing)
+// const getMentors = async (req, res) => {
+//     try {
+//         const { page = 1, limit = 10 } = req.query;
+//         const mentors = await Mentor.find()
+//             .skip((page - 1) * limit)
+//             .limit(parseInt(limit));
+
+//         // Transform the mentors to include the image URL
+//         const mentorsWithImages = mentors.map(mentor => ({
+//             _id: mentor._id,
+//             name: mentor.name,
+//             city: mentor.city,
+//             post: mentor.post,
+//             imageUrl: mentor.image.url, // Send the image URL instead of base64
+//         }));
+
+//         res.json(mentorsWithImages);
+//     } catch (err) {
+//         console.error('Error fetching mentors:', err.message);
+//         res.status(400).json({ error: err.message });
+//     }
+// };
+
+// // Get mentor by ID with all fields, including image
+// const getMentorById = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+
+//         const mentor = await Mentor.findById(id);
+
+//         if (!mentor) {
+//             return res.status(404).json({ error: 'Mentor not found.' });
+//         }
+
+//         // Include the image URL in response
+//         const mentorWithImage = {
+//             _id: mentor._id,
+//             name: mentor.name,
+//             city: mentor.city,
+//             post: mentor.post,
+//             imageUrl: mentor.image.url, // Include the image URL
+//         };
+
+//         res.json(mentorWithImage);
+//     } catch (err) {
+//         console.error('Error fetching mentor:', err.message);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// };
+
+// // Delete a mentor
+// const deleteMentor = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+
+//         const mentor = await Mentor.findById(id);
+//         if (!mentor) {
+//             return res.status(404).json({ error: 'Mentor not found.' });
+//         }
+
+//         // Optionally, delete the image file from the server
+//         const imagePath = path.join(__dirname, '../uploads', mentor.image.url.split('/').pop());
+//         fs.unlinkSync(imagePath); // Delete the file
+
+//         await Mentor.findByIdAndDelete(id);
+//         res.status(200).json({ message: 'Mentor deleted successfully!' });
+//     } catch (err) {
+//         console.error('Error deleting mentor:', err.message);
+//         res.status(400).json({ error: err.message });
+//     }
+// };
+
+// module.exports = {
+//     upload,
+//     createMentor,
+//     getMentors,
+//     getMentorById,
+//     deleteMentor,
+// };
+
 const Mentor = require('../models/mentorModel');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -326,7 +492,7 @@ const sharp = require('sharp');
 // Ensure the uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
+    fs.mkdirSync(uploadsDir, { recursive: true }); // Ensure parent directories are created if they don't exist
 }
 
 // Configure multer for file uploads
@@ -337,13 +503,13 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9); // Unique identifier
         const ext = path.extname(file.originalname); // Get file extension
-        cb(null, file.fieldname + '-' + uniqueSuffix + ext); // Create a unique filename
+        cb(null, `image-${uniqueSuffix}${ext}`); // Create a unique filename
     }
 });
 
 const upload = multer({
     storage,
-    limits: { fileSize: 1024 * 1024 * 10 },
+    limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size to 10MB
     fileFilter: (req, file, cb) => {
         const filetypes = /jpg|jpeg|png/;
         const mimetype = filetypes.test(file.mimetype);
@@ -354,42 +520,57 @@ const upload = multer({
     }
 }).single('image');
 
-// Create mentor with compressed image
 const createMentor = async (req, res) => {
     try {
+        console.log('Received request body:', req.body);
+        console.log('Uploaded file:', req.file);
+
         const { name, city, post } = req.body;
+
+        if (!name || !city || !post) {
+            return res.status(400).json({ error: 'All fields are required.' });
+        }
 
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded. Please upload an image.' });
         }
 
+        // Check if the file exists before processing
+        const filePath = req.file.path;
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'File not found. Please try again.' });
+        }
+
         // Compress the image using sharp
-        const compressedImageBuffer = await sharp(req.file.path)
-            .resize(300)
-            .jpeg({ quality: 80 })
+        const compressedImageBuffer = await sharp(filePath)
+            .resize(300) // Resize the image
+            .jpeg({ quality: 80 }) // Compress the image
             .toBuffer();
 
         // Save the compressed image back to the file system
-        await fs.promises.writeFile(req.file.path, compressedImageBuffer);
+        await fs.promises.writeFile(filePath, compressedImageBuffer);
 
-        // Store the image URL (file path) in MongoDB
-        const imageUrl = `/uploads/${req.file.filename}`; // Assuming your server serves static files from /uploads
+        // // Store the image URL (file path) in MongoDB
+        // const imageUrl = path.join('/uploads', path.basename(req.file.filename)); // Store relative URL
+
+        const imageUrl = path.join('/uploads', path.basename(filePath)).replace(/\\/g, '/');
+
 
         const newMentor = new Mentor({
             name,
             city,
             post,
             image: {
-                url: imageUrl, // Store the image URL
-                contentType: req.file.mimetype, // Store content type
+                url: imageUrl,
+                contentType: req.file.mimetype,
             }
         });
 
         await newMentor.save();
         res.status(201).json({ message: 'Mentor created successfully!', mentor: newMentor });
     } catch (err) {
-        console.error('Error creating mentor:', err.message);
-        res.status(500).json({ error: 'Internal Server Error. Please try again.' });
+        console.error('Error creating mentor:', err);
+        res.status(500).json({ error: 'Internal Server Error. Please try again.', details: err.message });
     }
 };
 
@@ -407,7 +588,7 @@ const getMentors = async (req, res) => {
             name: mentor.name,
             city: mentor.city,
             post: mentor.post,
-            imageUrl: mentor.image.url, // Send the image URL instead of base64
+            imageUrl: mentor.image.url,
         }));
 
         res.json(mentorsWithImages);
@@ -423,23 +604,21 @@ const getMentorById = async (req, res) => {
         const { id } = req.params;
 
         const mentor = await Mentor.findById(id);
-
         if (!mentor) {
             return res.status(404).json({ error: 'Mentor not found.' });
         }
 
-        // Include the image URL in response
         const mentorWithImage = {
             _id: mentor._id,
             name: mentor.name,
             city: mentor.city,
             post: mentor.post,
-            imageUrl: mentor.image.url, // Include the image URL
+            imageUrl: mentor.image.url,
         };
 
         res.json(mentorWithImage);
     } catch (err) {
-        console.error('Error fetching mentor:', err.message);
+        console.error('Error fetching mentor:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
@@ -454,9 +633,9 @@ const deleteMentor = async (req, res) => {
             return res.status(404).json({ error: 'Mentor not found.' });
         }
 
-        // Optionally, delete the image file from the server
-        const imagePath = path.join(__dirname, '../uploads', mentor.image.url.split('/').pop());
-        fs.unlinkSync(imagePath); // Delete the file
+        // Delete the image file from the server
+        const imagePath = path.join(__dirname, '../uploads', path.basename(mentor.image.url));
+        await fs.promises.unlink(imagePath); // Use promises to delete the file
 
         await Mentor.findByIdAndDelete(id);
         res.status(200).json({ message: 'Mentor deleted successfully!' });
