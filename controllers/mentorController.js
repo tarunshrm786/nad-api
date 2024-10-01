@@ -52,46 +52,6 @@ const createMentor = async (req, res) => {
     }
 };
 
-// // Create a new mentor
-// const createMentor = async (req, res) => {
-//     // Access uploaded file and fields from req
-//     const { name, city, post } = req.body;
-//     const imageBuffer = req.file ? req.file.buffer : null;
-
-//     try {
-//         console.log('Received request body:', { name, city, post });
-
-//         // Validate fields
-//         if (!name || !city || !post) {
-//             return res.status(400).json({ error: 'All fields are required.' });
-//         }
-
-//         if (!imageBuffer) {
-//             return res.status(400).json({ error: 'No image uploaded. Please upload an image.' });
-//         }
-
-//         // Convert image buffer to Base64 string
-//         const imageString = imageBuffer.toString('base64');
-
-//         // Create a new mentor instance
-//         const newMentor = new Mentor({
-//             name,
-//             city,
-//             post,
-//             image: {
-//                 data: imageString,
-//                 contentType: req.file.mimetype, // Capture the content type from the uploaded file
-//             },
-//         });
-
-//         await newMentor.save(); // Save the mentor to the database
-//         res.status(201).json({ message: 'Mentor created successfully!', mentor: newMentor });
-//     } catch (err) {
-//         console.error('Error creating mentor:', err);
-//         res.status(500).json({ error: 'Internal Server Error. Please try again.', details: err.message });
-//     }
-// };
-
 // Get mentors without image data (for listing)
 const getMentors = async (req, res) => {
     try {
