@@ -102,7 +102,7 @@ const sharp = require('sharp');
 // Configure multer for file uploads
 const upload = multer({
     storage: multer.memoryStorage(), // Store in memory to process with sharp
-    limits: { fileSize: 1024 * 1024 * 100 }, // Allow up to 10 MB for high-res images before compression
+    limits: { fileSize: 1024 * 1024 * 10 }, // Allow up to 10 MB for high-res images before compression
     fileFilter: (req, file, cb) => {
         const filetypes = /jpg|jpeg|png/;
         const mimetype = filetypes.test(file.mimetype);
@@ -151,37 +151,10 @@ const createMentor = async (req, res) => {
     }
 };
 
-// const getMentors = async (req, res) => {
-//     try {
-//         const mentors = await Mentor.find();
-//         res.json(mentors);
-//     } catch (err) {
-//         console.error('Error fetching mentors:', err.message);
-//         res.status(400).json({ error: err.message });
-//     }
-// };
-
 const getMentors = async (req, res) => {
     try {
-        // Fetch mentors while excluding the image data
-        const mentors = await Mentor.find().select('-image.data');
-
-        // Map through the mentors to include image URLs
-        const mentorsWithImageUrls = mentors.map(mentor => {
-            let imageUrl = null;
-
-            // Check if image data exists
-            if (mentor.image.data) {
-                imageUrl = `data:${mentor.image.contentType};base64,${mentor.image.data.toString('base64')}`;
-            }
-
-            return {
-                ...mentor._doc, // Spread the existing mentor data
-                imageUrl, // Add image URL to the response
-            };
-        });
-
-        res.json(mentorsWithImageUrls);
+        const mentors = await Mentor.find();
+        res.json(mentors);
     } catch (err) {
         console.error('Error fetching mentors:', err.message);
         res.status(400).json({ error: err.message });

@@ -1,3 +1,5 @@
+
+
 {
   "version": 2,
   "builds": [
@@ -11,5 +13,12 @@
       "src": "/(.*)",
       "dest": "server.js"
     }
-  ]
+  ],
+  "functions": {
+    "api/*": {
+      "maxDuration": 10,
+      "memory": 1024,
+      "maxBodySize": "10mb"  
+    }
+  }
 }
