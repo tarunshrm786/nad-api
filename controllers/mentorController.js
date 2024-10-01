@@ -232,7 +232,7 @@ const createMentor = async (req, res) => {
         });
 
         await newMentor.save();
-        res.status(201).json({ message: 'Mentor created successfully!' });
+        res.status(201).json({ message: 'Mentor created successfully!', mentor: newMentor });
     } catch (err) {
         console.error('Error creating mentor:', err.message);
         res.status(500).json({ error: 'Internal Server Error. Please try again.' });
@@ -244,11 +244,19 @@ const getMentors = async (req, res) => {
     try {
         const { page = 1, limit = 10 } = req.query;
         const mentors = await Mentor.find()
-            .select('name city post')
             .skip((page - 1) * limit)
             .limit(parseInt(limit));
 
-        res.json(mentors);
+        // Transform the mentors to include base64 image
+        const mentorsWithImages = mentors.map(mentor => ({
+            _id: mentor._id,
+            name: mentor.name,
+            city: mentor.city,
+            post: mentor.post,
+            base64Image: mentor.image.data ? mentor.image.data.toString('base64') : null,
+        }));
+
+        res.json(mentorsWithImages);
     } catch (err) {
         console.error('Error fetching mentors:', err.message);
         res.status(400).json({ error: err.message });
@@ -266,7 +274,16 @@ const getMentorById = async (req, res) => {
             return res.status(404).json({ error: 'Mentor not found.' });
         }
 
-        res.json(mentor);
+        // Include base64 image in response
+        const mentorWithImage = {
+            _id: mentor._id,
+            name: mentor.name,
+            city: mentor.city,
+            post: mentor.post,
+            base64Image: mentor.image.data ? mentor.image.data.toString('base64') : null,
+        };
+
+        res.json(mentorWithImage);
     } catch (err) {
         console.error('Error fetching mentor:', err.message);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -298,3 +315,4 @@ module.exports = {
     getMentorById,
     deleteMentor,
 };
+
