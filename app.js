@@ -37,7 +37,8 @@ const healthRoutes = require('./routes/healthRoutes'); // Health check route
 const mentorRoutes = require('./routes/mentorRoutes'); // Mentor routes
 const teamRoutes = require('./routes/teamRoutes'); // Team routes
 const aboutUsRoutes = require('./routes/aboutusRoutes'); // About Us routes
-const enquiryRoutes = require('./routes/enquiryRoutes'); // About Us routes
+const enquiryRoutes = require('./routes/enquiryRoutes'); // Enquiry routes
+const contactUsRoutes = require('./routes/contactusRoutes'); // ContactUs routes
 
 // Use routes
 app.use('/api/auth', studentRoutes); // Student routes (signup, login, etc.)
@@ -46,6 +47,7 @@ app.use('/api/mentors', mentorRoutes); // Mentor CRUD routes
 app.use('/api/teams', teamRoutes); // Team CRUD routes
 app.use('/api/aboutus', aboutUsRoutes); // About Us routes for banner upload and retrieval
 app.use('/api/enquiry', enquiryRoutes); // Team CRUD routes
+app.use('/api/contactus', contactUsRoutes); // Contact Us routes
 
 
 // Basic health check route
