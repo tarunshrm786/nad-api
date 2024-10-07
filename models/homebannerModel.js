@@ -1,15 +1,15 @@
+// models/HomeBanner.js
 const mongoose = require('mongoose');
 
-// Define the schema for HomeBanner
-const homeBannerSchema = new mongoose.Schema({
-  textOnBanner: {
+const HomeBannerSchema = new mongoose.Schema({
+  bannerText: {
     type: String,
     required: true,
   },
-  banner: {
-    type: String,  // Store banner image as a base64 string or URL
+  bannerImage: {
+    type: String,
     required: true,
   },
 }, { timestamps: true });
 
-module.exports = mongoose.model('HomeBanner', homeBannerSchema);
+module.exports = mongoose.model('HomeBanner', HomeBannerSchema);

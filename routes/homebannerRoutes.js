@@ -1,15 +1,25 @@
+// routes/homeBannerRoutes.js
 const express = require('express');
-const router = express.Router();
-const homeBannerController = require('../controllers/homebannerController');
 const multer = require('multer');
+const homeBannerController = require('../controllers/homebannerController');
 
-// Multer setup for image upload
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const router = express.Router();
 
-// Routes
-router.post('/', upload.single('banner'), homeBannerController.uploadHomeBanner); // POST route to create/update banner
-router.get('/', homeBannerController.getHomeBanner); // GET route to fetch banner
-router.delete('/', homeBannerController.deleteHomeBanner); // DELETE route to remove banner
+// Set up multer for file uploads
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage });
+
+
+//console.log(homeBannerController); // Should log the functions as an object
+
+
+// Route to create or update a banner
+router.post('/', upload.single('bannerImage'), homeBannerController.uploadBanner);
+
+// Route to fetch the banner
+router.get('/', homeBannerController.getBanner);
+
+// Route to delete the banner
+router.delete('/', homeBannerController.deleteBanner);
 
 module.exports = router;

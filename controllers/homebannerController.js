@@ -1,3 +1,4 @@
+// controllers/homeController.js
 const HomeBanner = require('../models/homebannerModel');
 const sharp = require('sharp');
 
@@ -6,11 +7,15 @@ const bufferToBase64 = (buffer) => {
   return buffer.toString('base64');
 };
 
-// Create or update a banner with text and image
-exports.uploadHomeBanner = async (req, res) => {
+// Create or replace a banner
+exports.uploadBanner = async (req, res) => {
   try {
-    const { textOnBanner } = req.body;
     const file = req.file;
+
+    // Check if the file exists
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
 
     // Check if the file size is less than 5 MB
     if (file.size > 5 * 1024 * 1024) {
@@ -27,46 +32,49 @@ exports.uploadHomeBanner = async (req, res) => {
     const bannerBase64 = bufferToBase64(compressedImageBuffer);
 
     // Check if a banner already exists
-    const existingHomeBanner = await HomeBanner.findOne();
+    const existingBanner = await HomeBanner.findOne();
 
-    if (existingHomeBanner) {
+    if (existingBanner) {
       // If a banner exists, update it
-      existingHomeBanner.textOnBanner = textOnBanner;
-      existingHomeBanner.banner = bannerBase64;
-      await existingHomeBanner.save();
-      return res.status(200).json({ message: 'Home Banner updated successfully', banner: existingHomeBanner });
+      existingBanner.bannerText = req.body.bannerText; // Assuming you also want to update the text
+      existingBanner.bannerImage = bannerBase64;
+      await existingBanner.save();
+      return res.status(200).json({ message: 'Banner updated successfully', banner: existingBanner });
     } else {
       // Save a new banner if none exists
-      const newHomeBanner = new HomeBanner({ textOnBanner, banner: bannerBase64 });
-      await newHomeBanner.save();
-      res.status(201).json({ message: 'Home Banner uploaded successfully', banner: newHomeBanner });
+      const newBanner = new HomeBanner({
+        bannerText: req.body.bannerText, // Assuming you also want to set the text
+        bannerImage: bannerBase64,
+      });
+      await newBanner.save();
+      return res.status(201).json({ message: 'Banner uploaded successfully', banner: newBanner });
     }
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// Fetch the most recent home banner
-exports.getHomeBanner = async (req, res) => {
+// Fetch the banner
+exports.getBanner = async (req, res) => {
   try {
-    const homeBanner = await HomeBanner.findOne().sort({ createdAt: -1 });
-    if (!homeBanner) {
-      return res.status(404).json({ message: 'No home banner found' });
+    const banner = await HomeBanner.findOne().sort({ createdAt: -1 }); // Get the most recent banner
+    if (!banner) {
+      return res.status(404).json({ message: 'No banner found' });
     }
-    res.status(200).json(homeBanner);
+    res.status(200).json(banner);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// Delete the most recent home banner
-exports.deleteHomeBanner = async (req, res) => {
+// Delete the banner
+exports.deleteBanner = async (req, res) => {
   try {
-    const deletedHomeBanner = await HomeBanner.findOneAndDelete();
-    if (!deletedHomeBanner) {
-      return res.status(404).json({ message: 'No home banner found to delete' });
+    const deletedBanner = await HomeBanner.findOneAndDelete(); // Deletes the most recent banner
+    if (!deletedBanner) {
+      return res.status(404).json({ message: 'No banner found to delete' });
     }
-    res.status(200).json({ message: 'Home Banner deleted successfully', banner: deletedHomeBanner });
+    res.status(200).json({ message: 'Banner deleted successfully', banner: deletedBanner });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
