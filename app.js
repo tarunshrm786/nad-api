@@ -39,6 +39,7 @@ const teamRoutes = require('./routes/teamRoutes'); // Team routes
 const aboutUsRoutes = require('./routes/aboutusRoutes'); // About Us routes
 const enquiryRoutes = require('./routes/enquiryRoutes'); // Enquiry routes
 const contactUsRoutes = require('./routes/contactusRoutes'); // ContactUs routes
+const homeBannerRoutes = require('./routes/homebannerRoutes'); // Home Banner routes
 
 // Use routes
 app.use('/api/auth', studentRoutes); // Student routes (signup, login, etc.)
@@ -48,7 +49,7 @@ app.use('/api/teams', teamRoutes); // Team CRUD routes
 app.use('/api/aboutus', aboutUsRoutes); // About Us routes for banner upload and retrieval
 app.use('/api/enquiry', enquiryRoutes); // Team CRUD routes
 app.use('/api/contactus', contactUsRoutes); // Contact Us routes
-
+app.use('/api/homebanner', homeBannerRoutes); // Home Banner routes for text and image upload
 
 // Basic health check route
 app.get('/api/health', (req, res) => {
