@@ -7,7 +7,7 @@ const homeBannerSchema = new mongoose.Schema({
     required: true,
   },
   banner: {
-    type: String, // Storing banner image as base64
+    type: String,  // Store banner image as a base64 string or URL
     required: true,
   },
 }, { timestamps: true });
