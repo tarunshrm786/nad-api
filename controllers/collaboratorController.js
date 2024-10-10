@@ -1,82 +1,85 @@
-// controllers/collaboratorController.js
 const Collaborator = require('../models/collaboratorModel');
-const sharp = require('sharp');
+const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
 
-// Helper function to convert image buffer to base64 string
-const bufferToBase64 = (buffer) => {
-    return buffer.toString('base64');
+// Set up multer for file uploads (storing files in memory)
+const storage = multer.memoryStorage();  // Store the file in memory
+const upload = multer({ storage: storage });
+
+// Create a new collaborator and upload images
+const createCollaborator = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'Images are required' });
+    }
+
+    const imageArray = [];
+    for (const file of req.files) {
+      // Check the size of the file (200 KB limit)
+      if (file.size > 200 * 1024) {
+        return res.status(400).json({ message: 'Each image must be less than 200 KB' });
+      }
+
+      // Convert the file buffer to base64 string
+      const base64Image = file.mimetype + ';base64,' + file.buffer.toString('base64');
+
+      imageArray.push({
+        id: uuidv4(), // Assign a unique ID for each image
+        imageData: base64Image
+      });
+    }
+
+    const collaborator = new Collaborator({
+      images: imageArray // Store images in base64 format
+    });
+
+    await collaborator.save();
+    res.status(201).json(collaborator);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating collaborator', error });
+  }
 };
 
-// Upload multiple logos
-exports.uploadLogos = async (req, res) => {
-    try {
-        const files = req.files; // Access multiple files from req.files
-
-        // Validate that at least one file was uploaded
-        if (!files || files.length === 0) {
-            return res.status(400).json({ message: 'No files uploaded' });
-        }
-
-        // Check if all files are PNG and under 200 KB
-        for (const file of files) {
-            if (file.size > 200 * 1024) { // 200 KB limit
-                return res.status(400).json({ message: 'Each image must be less than 200 KB' });
-            }
-            if (!file.mimetype.includes('image/png')) {
-                return res.status(400).json({ message: 'Only PNG images are allowed' });
-            }
-        }
-
-        // Process and compress images
-        const logoBase64Array = await Promise.all(files.map(async (file) => {
-            const compressedImageBuffer = await sharp(file.buffer)
-                .resize({ width: 1200, height: 800, fit: 'inside' }) // Resize while maintaining aspect ratio
-                .toFormat('png') // Convert to PNG
-                .toBuffer();
-            return bufferToBase64(compressedImageBuffer); // Convert buffer to base64 string
-        }));
-
-        // Check if a Collaborator document already exists
-        const existingCollaborator = await Collaborator.findOne();
-
-        if (existingCollaborator) {
-            // If it exists, update the logos array
-            existingCollaborator.logos = [...existingCollaborator.logos, ...logoBase64Array];
-            await existingCollaborator.save();
-            return res.status(200).json({ message: 'Logos updated successfully', logos: existingCollaborator.logos });
-        } else {
-            // Save a new document if none exists
-            const newCollaborator = new Collaborator({ logos: logoBase64Array });
-            await newCollaborator.save();
-            res.status(201).json({ message: 'Logos uploaded successfully', logos: newCollaborator.logos });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+// Fetch all collaborators (and their images)
+const getCollaborators = async (req, res) => {
+  try {
+    const collaborators = await Collaborator.find();
+    res.status(200).json(collaborators);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching collaborators', error });
+  }
 };
 
-// Fetch the logos
-exports.getLogos = async (req, res) => {
-    try {
-        const collaborator = await Collaborator.findOne().sort({ createdAt: -1 }); // Get the most recent document
-        if (!collaborator) {
-            return res.status(404).json({ message: 'No logos found' });
-        }
-        res.status(200).json(collaborator);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+// Delete an image from a collaborator's images array using the collaborator ID and image ID
+const deleteImage = async (req, res) => {
+  try {
+    const { collaboratorId, imageId } = req.params; // Get collaborator ID and image ID from the request
+
+    const collaborator = await Collaborator.findById(collaboratorId);
+    if (!collaborator) {
+      return res.status(404).json({ message: 'Collaborator not found' });
     }
+
+    // Find the index of the image to delete
+    const imageIndex = collaborator.images.findIndex(img => img.id === imageId);
+    if (imageIndex === -1) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+
+    // Remove the image from the array
+    collaborator.images.splice(imageIndex, 1);
+    await collaborator.save();
+
+    res.status(200).json({ message: 'Image deleted successfully', collaborator });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting image', error });
+  }
 };
 
-// Delete logos (you can customize this function as needed)
-exports.deleteLogos = async (req, res) => {
-    try {
-        const deletedCollaborator = await Collaborator.findOneAndDelete(); // Deletes the most recent document
-        if (!deletedCollaborator) {
-            return res.status(404).json({ message: 'No logos found to delete' });
-        }
-        res.status(200).json({ message: 'Logos deleted successfully', logos: deletedCollaborator.logos });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+// Export all functions and multer middleware
+module.exports = {
+  createCollaborator,
+  getCollaborators,
+  deleteImage,
+  upload // Export multer to be used in routes
 };

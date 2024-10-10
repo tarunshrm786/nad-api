@@ -51,7 +51,7 @@ app.use('/api/aboutus', aboutUsRoutes); // About Us routes for banner upload and
 app.use('/api/enquiry', enquiryRoutes); // Team CRUD routes
 app.use('/api/contactus', contactUsRoutes); // Contact Us routes
 app.use('/api/homebanner', homeBannerRoutes); // Home Banner routes for text and image upload
-app.use('/api/collaborators', collaboratorRoutes); // Collaborator routes for logo uploads
+app.use('/api/collaborators', collaboratorRoutes); // Collaborator routes
 
 // Basic health check route
 app.get('/api/health', (req, res) => {

@@ -1,19 +1,15 @@
-// routes/collaboratorRoutes.js
 const express = require('express');
+const { createCollaborator, getCollaborators, deleteImage, upload } = require('../controllers/collaboratorController');
+
 const router = express.Router();
-const multer = require('multer');
-const collaboratorController = require('../controllers/collaboratorController');
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage }).array('logos', 10); // Allow up to 10 logo uploads
+// POST: Create a collaborator with image uploads
+router.post('/', upload.array('images'), createCollaborator);
 
-// Route to upload logos
-router.post('/upload', upload, collaboratorController.uploadLogos);
+// GET: Fetch all collaborators and their images
+router.get('/', getCollaborators);
 
-// Route to fetch logos
-router.get('/', collaboratorController.getLogos);
-
-// Route to delete logos
-router.delete('/delete', collaboratorController.deleteLogos);
+// DELETE: Delete a specific image from a collaborator
+router.delete('/collaborators/:collaboratorId/images/:imageId', deleteImage);
 
 module.exports = router;
